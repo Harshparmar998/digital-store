@@ -5,379 +5,275 @@ import { supabase } from '../supabase'
 
 export default function AdminProducts() {
 
-  const [products, setProducts] = useState([])
+    const [products, setProducts] = useState([])
+    const [loading, setLoading] = useState(true)
 
-  const [loading, setLoading] = useState(true)
+    const [showForm, setShowForm] = useState(false)
+    const [editingId, setEditingId] = useState(null)
 
-  const [showForm, setShowForm] = useState(false)
+    const [title, setTitle] = useState('')
+    const [price, setPrice] = useState('')
+    const [image, setImage] = useState('')
+    const [description, setDescription] = useState('')
+    const [paymentLink, setPaymentLink] = useState('')
+    const [trending, setTrending] = useState(false)
 
-  const [editingId, setEditingId] = useState(null)
+    useEffect(() => {
+        fetchProducts()
+    }, [])
 
-  const [title, setTitle] = useState('')
-  const [price, setPrice] = useState('')
-  const [image, setImage] = useState('')
-  const [description, setDescription] = useState('')
-  const [paymentLink, setPaymentLink] = useState('')
-  const [trending, setTrending] = useState(false)
+    async function fetchProducts() {
+        setLoading(true)
 
-  useEffect(() => {
+        const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .order('id', { ascending: false })
 
-    fetchProducts()
+        if (!error) setProducts(data)
 
-  }, [])
-
-  async function fetchProducts() {
-
-    setLoading(true)
-
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .order('id', { ascending: false })
-
-    if (!error) {
-      setProducts(data)
+        setLoading(false)
     }
 
-    setLoading(false)
-
-  }
-
-  function resetForm() {
-
-    setEditingId(null)
-
-    setTitle('')
-    setPrice('')
-    setImage('')
-    setDescription('')
-    setPaymentLink('')
-    setTrending(false)
-
-  }
-
-  function handleEdit(item) {
-
-    setShowForm(true)
-
-    setEditingId(item.id)
-
-    setTitle(item.title || '')
-    setPrice(item.price || '')
-    setImage(item.image || '')
-    setDescription(item.description || '')
-    setPaymentLink(item.payment_link || '')
-    setTrending(item.trending || false)
-
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    })
-
-  }
-
-  async function handleSubmit(e) {
-
-    e.preventDefault()
-
-    const productData = {
-      title,
-      price,
-      image,
-      description,
-      payment_link: paymentLink,
-      trending
+    function resetForm() {
+        setEditingId(null)
+        setTitle('')
+        setPrice('')
+        setImage('')
+        setDescription('')
+        setPaymentLink('')
+        setTrending(false)
     }
 
-    if (editingId) {
+    function handleEdit(item) {
 
-      const { error } = await supabase
-        .from('products')
-        .update(productData)
-        .eq('id', editingId)
+        setShowForm(true)
+        setEditingId(item.id)
 
-      if (error) {
-        console.log(error)
-        return
-      }
+        setTitle(item.title || '')
+        setPrice(item.price || '')
+        setImage(item.image || '')
+        setDescription(item.description || '')
+        setPaymentLink(item.payment_link || '')
+        setTrending(item.trending || false)
 
-    } else {
-
-      const { error } = await supabase
-        .from('products')
-        .insert([productData])
-
-      if (error) {
-        console.log(error)
-        return
-      }
-
+        window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
-    resetForm()
+    async function handleSubmit(e) {
 
-    setShowForm(false)
+        e.preventDefault()
 
-    fetchProducts()
+        const productData = {
+            title,
+            price,
+            image,
+            description,
+            payment_link: paymentLink,
+            trending
+        }
 
-  }
+        if (editingId) {
 
-  async function handleDelete(id) {
+            await supabase
+                .from('products')
+                .update(productData)
+                .eq('id', editingId)
 
-    const confirmDelete = window.confirm(
-      'Delete this product?'
-    )
+        } else {
 
-    if (!confirmDelete) {
-      return
+            await supabase
+                .from('products')
+                .insert([productData])
+        }
+
+        resetForm()
+        setShowForm(false)
+        fetchProducts()
     }
 
-    const { error } = await supabase
-      .from('products')
-      .delete()
-      .eq('id', id)
+    async function handleDelete(id) {
 
-    if (!error) {
+        const ok = window.confirm('Delete this product?')
+        if (!ok) return
 
-      setProducts(
-        products.filter((item) => item.id !== id)
-      )
+        const { error } = await supabase
+            .from('products')
+            .delete()
+            .eq('id', id)
 
+        if (!error) {
+            setProducts(products.filter((p) => p.id !== id))
+        }
     }
 
-  }
-
-  if (loading) {
+    if (loading) {
+        return (
+            <section className="admin-products-page">
+                <h2 style={{ color: '#fff' }}>Loading Products...</h2>
+            </section>
+        )
+    }
 
     return (
-      <section className="admin-products-page">
-        <h2 style={{ color: '#fff' }}>
-          Loading Products...
-        </h2>
-      </section>
-    )
 
-  }
+        <section className="admin-products-page">
 
-  return (
+            <div className="admin-products-container">
 
-    <section className="admin-products-page">
+                {/* HEADER */}
+                <div className="admin-products-header">
+                    <div>
+                        <span>Admin Products</span>
+                        <h1>Product Management</h1>
+                    </div>
 
-      <div className="admin-products-container">
+                    <button
+                        className="add-product-btn"
+                        onClick={() => {
+                            resetForm()
+                            setShowForm(!showForm)
+                        }}
+                    >
+                        + Add Product
+                    </button>
+                </div>
 
-        <div className="admin-products-header">
+                {/* FORM */}
+                {showForm && (
+                    <div className="admin-form-card">
 
-          <div>
+                        <h2>{editingId ? 'Edit Product' : 'Add Product'}</h2>
 
-            <span>
-              Admin Products
-            </span>
+                        <form className="admin-product-form" onSubmit={handleSubmit}>
 
-            <h1>
-              Product Management
-            </h1>
+                            <input
+                                placeholder="Product Title"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                required
+                            />
 
-          </div>
+                            <input
+                                placeholder="Price"
+                                value={price}
+                                onChange={(e) => setPrice(e.target.value)}
+                                required
+                            />
 
-          <button
-            className="add-product-btn"
-            onClick={() => {
-              resetForm()
-              setShowForm(!showForm)
-            }}
-          >
-            + Add Product
-          </button>
+                            <input
+                                placeholder="Image URL"
+                                value={image}
+                                onChange={(e) => setImage(e.target.value)}
+                                required
+                            />
 
-        </div>
+                            <textarea
+                                placeholder="Description"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                required
+                            />
 
-        {
-          showForm && (
+                            <input
+                                placeholder="Payment Link"
+                                value={paymentLink}
+                                onChange={(e) => setPaymentLink(e.target.value)}
+                            />
 
-            <div className="admin-form-card">
+                            <label className="stock-checkbox">
+                                <input
+                                    type="checkbox"
+                                    checked={trending}
+                                    onChange={(e) => setTrending(e.target.checked)}
+                                />
+                                Trending Product
+                            </label>
 
-              <h2>
-                {
-                  editingId
-                    ? 'Edit Product'
-                    : 'Add Product'
-                }
-              </h2>
+                            <div className="admin-form-buttons">
+                                <button type="submit">
+                                    {editingId ? 'Update Product' : 'Add Product'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                )}
 
-              <form
-                className="admin-product-form"
-                onSubmit={handleSubmit}
-              >
+                {/* TABLE */}
+                <div className="admin-table-wrapper">
 
-                <input
-                  type="text"
-                  placeholder="Product Title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                />
+                    <table className="admin-products-table">
 
-                <input
-                  type="text"
-                  placeholder="Price"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  required
-                />
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Image</th>
+                                <th>Title</th>
+                                <th>Price</th>
+                                <th>Trending</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
 
-                <input
-                  type="text"
-                  placeholder="Image URL"
-                  value={image}
-                  onChange={(e) => setImage(e.target.value)}
-                  required
-                />
+                        <tbody>
 
-                <textarea
-                  placeholder="Product Description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows="5"
-                  required
-                />
+                            {products.map((item) => (
 
-                <input
-                  type="text"
-                  placeholder="Payment Link"
-                  value={paymentLink}
-                  onChange={(e) => setPaymentLink(e.target.value)}
-                  
-                />
+                                <tr key={item.id}>
 
-                <label className="stock-checkbox">
+                                    <td data-label="ID">{item.id}</td>
 
-                  <input
-                    type="checkbox"
-                    checked={trending}
-                    onChange={(e) => setTrending(e.target.checked)}
-                  />
+                                    <td data-label="Image">
+                                        <img
+                                            src={item.image}
+                                            className="admin-product-image"
+                                        />
+                                    </td>
 
-                  Trending Product
+                                    <td data-label="Title">{item.title}</td>
 
-                </label>
+                                    <td data-label="Price">₹{item.price}</td>
 
-                <div className="admin-form-buttons">
+                                    <td data-label="Trending">
+                                        <span className={item.trending ? 'status-active' : 'status-out'}>
+                                            {item.trending ? 'Trending' : 'Normal'}
+                                        </span>
+                                    </td>
 
-                  <button type="submit">
-                    {
-                      editingId
-                        ? 'Update Product'
-                        : 'Add Product'
-                    }
-                  </button>
+                                    <td data-label="Actions">
+
+                                        <div className="admin-table-actions">
+
+                                            <button
+                                                className="edit-btn"
+                                                onClick={() => handleEdit(item)}
+                                            >
+                                                Edit
+                                            </button>
+
+                                            <button
+                                                className="delete-btn"
+                                                onClick={() => handleDelete(item.id)}
+                                            >
+                                                Delete
+                                            </button>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+                            ))}
+
+                        </tbody>
+
+                    </table>
 
                 </div>
 
-              </form>
-
             </div>
 
-          )
-        }
-
-        <div className="admin-table-wrapper">
-
-          <table className="admin-products-table">
-
-            <thead>
-
-              <tr>
-                <th>ID</th>
-                <th>Image</th>
-                <th>Title</th>
-                <th>Price</th>
-                <th>Trending</th>
-                <th>Actions</th>
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-              {products.map((item) => (
-
-                <tr key={item.id}>
-
-                  <td>
-                    {item.id}
-                  </td>
-
-                  <td>
-
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="admin-product-image"
-                    />
-
-                  </td>
-
-                  <td>
-                    {item.title}
-                  </td>
-
-                  <td>
-                    ₹{item.price}
-                  </td>
-
-                  <td>
-
-                    <span
-                      className={
-                        item.trending
-                          ? 'status-active'
-                          : 'status-out'
-                      }
-                    >
-                      {
-                        item.trending
-                          ? 'Trending'
-                          : 'Normal'
-                      }
-                    </span>
-
-                  </td>
-
-                  <td>
-
-                    <div className="admin-table-actions">
-
-                      <button
-                        className="edit-btn"
-                        onClick={() => handleEdit(item)}
-                      >
-                        Edit
-                      </button>
-
-                      <button
-                        className="delete-btn"
-                        onClick={() => handleDelete(item.id)}
-                      >
-                        Delete
-                      </button>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-
-              ))}
-
-            </tbody>
-
-          </table>
-
-        </div>
-
-      </div>
-
-    </section>
-
-  )
+        </section>
+    )
 }

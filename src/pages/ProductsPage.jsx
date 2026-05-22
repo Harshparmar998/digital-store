@@ -2,10 +2,35 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
 import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 
-import products from '../data/products'
+import { supabase } from '../supabase'
 
 export default function ProductsPage(){
+
+  const [products, setProducts] = useState([])
+
+  useEffect(() => {
+
+    async function getProducts(){
+
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+
+      if(data){
+        setProducts(data)
+      }
+
+      if(error){
+        console.log(error)
+      }
+
+    }
+
+    getProducts()
+
+  }, [])
 
   return(
 

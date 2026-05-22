@@ -1,10 +1,11 @@
 import { Link, useLocation } from 'react-router-dom'
+import { HashLink } from 'react-router-hash-link'
 
-export default function Navbar(){
+export default function Navbar() {
 
   const location = useLocation()
 
-  return(
+  return (
 
     <nav className="navbar">
 
@@ -16,37 +17,39 @@ export default function Navbar(){
           to="/"
           className="logo"
         >
-          DigiStore
+          Nexora
         </Link>
 
         {/* LINKS */}
 
         <div className="nav-links">
 
+          {/* PRODUCTS */}
+
           <Link
             to="/products"
             className={
               location.pathname === "/products"
-              ? "active-nav"
-              : ""
+                ? "active-nav"
+                : ""
             }
           >
             Products
           </Link>
 
-          <a href="/#features">
-            Features
-          </a>
+          {/* FEATURES */}
 
-          <a href="/#reviews">
+          <HashLink smooth to="/#features">
+            Features
+          </HashLink>
+
+          {/* REVIEWS */}
+
+          <HashLink smooth to="/#reviews">
             Reviews
-          </a>
+          </HashLink>
 
         </div>
-
-        {/* BUTTON */}
-
-  
 
       </div>
 

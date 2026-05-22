@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 export default function Hero() {
   return (
     <section className="hero">
@@ -26,11 +28,11 @@ export default function Hero() {
 
           <div className="hero-buttons">
 
-            <a href="/products" className="primary-btn">
+            <Link to="/products" className="primary-btn">
               Explore Products
-            </a>
+            </Link>
 
-           
+
           </div>
 
           <div className="hero-stats">

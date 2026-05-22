@@ -95,7 +95,7 @@ export default function ProductsPage(){
                   <div className="all-product-bottom">
 
                     <span className="product-price">
-                      {item.price}
+                      ₹{item.price}
                     </span>
 
                     <span className="product-rating-small">

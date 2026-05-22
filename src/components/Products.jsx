@@ -62,7 +62,7 @@ export default function Products(){
 
                 <div className="product-bottom">
 
-                  <h4>{item.price}</h4>
+                  <h4>₹{item.price}</h4>
 
                   <span className="view-btn">
                     View Product

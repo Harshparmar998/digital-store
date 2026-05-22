@@ -12,9 +12,14 @@ import Footer from './components/Footer'
 import ProductPage from './pages/ProductPage'
 import ProductsPage from './pages/ProductsPage'
 
-function HomePage(){
+import AdminLogin from './admin/AdminLogin'
+import AdminDashboard from './admin/AdminDashboard'
+import ProtectedRoute from './admin/ProtectedRoute'
+import AdminProducts from './admin/AdminProducts'
 
-  return(
+function HomePage() {
+
+  return (
     <>
       <Navbar />
       <Hero />
@@ -28,9 +33,9 @@ function HomePage(){
   )
 }
 
-export default function App(){
+export default function App() {
 
-  return(
+  return (
 
     <Routes>
 
@@ -53,6 +58,33 @@ export default function App(){
       <Route
         path="/product/:id"
         element={<ProductPage />}
+      />
+
+      {/* ADMIN LOGIN */}
+
+      <Route
+        path="/admin"
+        element={<AdminLogin />}
+      />
+
+      {/* ADMIN DASHBOARD */}
+
+      <Route
+        path="/admin/dashboard"
+        element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/products"
+        element={
+          <ProtectedRoute>
+            <AdminProducts />
+          </ProtectedRoute>
+        }
       />
 
     </Routes>

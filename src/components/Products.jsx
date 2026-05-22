@@ -1,9 +1,37 @@
 import { Link } from 'react-router-dom'
-import products from '../data/products'
+import { useEffect, useState } from 'react'
+
+import { supabase } from '../supabase'
 
 export default function Products(){
 
+  const [products, setProducts] = useState([])
+
+  useEffect(() => {
+
+    async function getTrendingProducts(){
+
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('trending', true)
+
+      if(data){
+        setProducts(data)
+      }
+
+      if(error){
+        console.log(error)
+      }
+
+    }
+
+    getTrendingProducts()
+
+  }, [])
+
   return(
+
     <section className="products" id="products">
 
       <div className="container">
@@ -23,7 +51,10 @@ export default function Products(){
               key={item.id}
             >
 
-              <img src={item.image} alt={item.title} />
+              <img
+                src={item.image}
+                alt={item.title}
+              />
 
               <div className="product-content">
 

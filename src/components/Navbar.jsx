@@ -17,7 +17,7 @@ export default function Navbar() {
           to="/"
           className="logo"
         >
-          Nexora
+          Digivaulto
         </Link>
 
         {/* LINKS */}
